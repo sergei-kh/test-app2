@@ -1,0 +1,13 @@
+.limited-box {
+    max-height: 300px;
+    overflow: auto;
+    border-bottom: 1px solid #d3d3d3;
+    &_static {
+        &_small {
+            height: 100px;
+        }
+        &_normal {
+            height: 300px;
+        }
+    }
+}

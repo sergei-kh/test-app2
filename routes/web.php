@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\StorageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [PageController::class, 'index'])->name('main');
+Route::get('/stock-manager', [PageController::class, 'stockManager'])->name('stock-manager');
+Route::get('/storages', [PageController::class, 'storage'])->name('storage');
+Route::get('/products', [PageController::class, 'products'])->name('products');
+
+Route::resource('storage', StorageController::class);
