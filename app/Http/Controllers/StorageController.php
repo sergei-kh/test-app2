@@ -7,7 +7,7 @@ use App\Models\Storage;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+
 use App\Helpers\Storage\StorageHelper;
 
 class StorageController extends Controller
@@ -20,6 +20,20 @@ class StorageController extends Controller
     public function index(): JsonResponse
     {
         $storages = Storage::with('products')->get();
+        return response()->json([
+            'status' => true,
+            'storages' => $storages,
+        ]);
+    }
+
+    /**
+     * Display warehouse list and product list
+     *
+     * @return JsonResponse
+     */
+    public function indexProducts(): JsonResponse
+    {
+        $storages = Storage::with('products')->get();
         $products = Product::all();
         return response()->json([
             'status' => true,
@@ -29,46 +43,25 @@ class StorageController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * The method is triggered when we transfer goods from one warehouse to another
      *
-     * @return Response
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function create()
+    public function transfer(Request $request): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        //
+        $storages = Storage::with('products')->get();
+        $storageFrom = $storages->firstWhere('id', $request->from_storage);
+        $storageTo = $storages->firstWhere('id', $request->to_storage);
+        $productsDataFrom = StorageHelper::mergingDataProductsFrom($storageFrom->products,
+            json_decode($request->data_from, true));
+        $productsDataTo = StorageHelper::getDataProductsTo(json_decode($request->data_to, true));
+        $storageFrom->products()->sync($productsDataFrom);
+        $storageTo->products()->sync($productsDataTo);
+        return response()->json([
+            'status' => true,
+            'storages_updated' => Storage::with('products')->get(),
+        ]);
     }
 
     /**
@@ -93,16 +86,5 @@ class StorageController extends Controller
             'id' => $storage->id,
             'products' => $storage->products()->get(),
         ]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

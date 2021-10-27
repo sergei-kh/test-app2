@@ -20,4 +20,6 @@ Route::get('/stock-manager', [PageController::class, 'stockManager'])->name('sto
 Route::get('/storages', [PageController::class, 'storage'])->name('storage');
 Route::get('/products', [PageController::class, 'products'])->name('products');
 
+Route::get('/storage/products', [StorageController::class, 'indexProducts']);
+Route::post('/storage/transfer', [StorageController::class, 'transfer']);
 Route::resource('storage', StorageController::class);

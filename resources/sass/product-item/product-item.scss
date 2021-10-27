@@ -1,5 +1,11 @@
 .product-item {
-    &__small {
-        width: 40%;
+    &__title {
+        width: 100px;
+    }
+    &__count {
+        font-size: 14px;
+        color: #727272;
+        font-weight: 500;
+        letter-spacing: .3px;
     }
 }

@@ -39,7 +39,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" :disabled="showLoader">
                         <span v-show="!showLoader">Сохранить</span>
                         <span class="spinner-border spinner-border_small text-light" role="status" v-show="showLoader">
                             <span class="visually-hidden">Загрузка...</span>
@@ -66,7 +66,7 @@ export default {
         // When the modal changes visibility
         signal: function (val) {
             if (val) {
-                this.$axios.get('/storage').then((response) => {
+                this.$axios.get('/storage/products').then((response) => {
                     this.storages = response.data.storages;
                     this.products = response.data.products;
                     this.products.forEach((product) => {
