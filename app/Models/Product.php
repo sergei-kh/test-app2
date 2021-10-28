@@ -28,4 +28,16 @@ class Product extends Model
             ->belongsToMany(Storage::class)
             ->withPivot('count');
     }
+
+    /**
+     * Get stories for product
+     *
+     * @return BelongsToMany
+     */
+    public function stories(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Story::class)
+            ->withPivot('count', 'remainder', 'is_decreased', 'is_increased', 'is_deleted', 'is_created');
+    }
 }
