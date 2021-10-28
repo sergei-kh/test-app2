@@ -7,8 +7,8 @@
        class="list-group-item list-group-item-action @if(Route::is('storage')) active @endif">
         Склады
     </a>
-    <a href="{{route('stock-manager')}}"
-       class="list-group-item list-group-item-action @if(Route::is('stock-manager')) active @endif">
+    <a href="{{route('stock_manager')}}"
+       class="list-group-item list-group-item-action @if(Route::is('stock_manager')) active @endif">
         Управление наличием
     </a>
 </nav>

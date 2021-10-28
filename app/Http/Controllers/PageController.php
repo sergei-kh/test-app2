@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Models\Storage;
+
+use App\Helpers\Story\StoryHelper;
+
 class PageController extends Controller
 {
     public function index()
@@ -16,11 +21,34 @@ class PageController extends Controller
 
     public function storage()
     {
-        return view('page.storage');
+        $storages = Storage::all();
+        return view('page.storage.storage', compact('storages'));
+    }
+
+    public function storageProducts($id)
+    {
+        $storage = Storage::with('products')->findOrFail($id);
+        return view('page.storage.storage_products', compact('storage'));
+    }
+
+    public function storageStories($id)
+    {
+        $storage = Storage::with(['stories' => function ($query) {
+            $query->orderBy('id', 'desc');
+            $query->with('products');
+        }])->findOrFail($id);
+        $stories = StoryHelper::getFormatData($storage->stories);
+        return view('page.storage.storage_story', compact('storage', 'stories'));
     }
 
     public function products()
     {
-        return view('page.products');
+        $products = Product::all();
+        return view('page.products.products', compact('products'));
+    }
+
+    public function productsStory()
+    {
+
     }
 }

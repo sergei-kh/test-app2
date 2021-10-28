@@ -9,9 +9,23 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 use App\Helpers\Storage\StorageHelper;
+use App\Helpers\Story\StoryHelper;
+use App\Contracts\StoryManager;
 
 class StorageController extends Controller
 {
+    /**
+     * Service for working with warehouse history
+     *
+     * @var StoryManager
+     */
+    protected $storyManager;
+
+    public function __construct(StoryManager $storyManager)
+    {
+        $this->storyManager = $storyManager;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -53,11 +67,16 @@ class StorageController extends Controller
         $storages = Storage::with('products')->get();
         $storageFrom = $storages->firstWhere('id', $request->from_storage);
         $storageTo = $storages->firstWhere('id', $request->to_storage);
-        $productsDataFrom = StorageHelper::mergingDataProductsFrom($storageFrom->products,
-            json_decode($request->data_from, true));
-        $productsDataTo = StorageHelper::getDataProductsTo(json_decode($request->data_to, true));
+        $dataFrom = json_decode($request->data_from, true);
+        $dataTo = json_decode($request->data_to, true);
+        $productsDataFrom = StorageHelper::mergingDataProductsFrom($storageFrom->products, $dataFrom);
+        $infoProductsFrom = StoryHelper::getInfoProductsFrom($storageFrom->products, $productsDataFrom, $dataFrom);
+        $productsDataTo = StorageHelper::getDataProductsTo($dataTo);
+        $infoProductsTo = StoryHelper::getInfoProductsTo($storageTo->products, $productsDataTo);
         $storageFrom->products()->sync($productsDataFrom);
         $storageTo->products()->sync($productsDataTo);
+        $this->storyManager->create($storageFrom, $infoProductsFrom, true, $storageTo->id);
+        $this->storyManager->create($storageTo, $infoProductsTo, false, $storageFrom->id);
         return response()->json([
             'status' => true,
             'storages_updated' => Storage::with('products')->get(),

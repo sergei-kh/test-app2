@@ -185,17 +185,17 @@ export default {
             }
         },
         onSendData: function (e) {
-            let target = e.target;
-            let btn = null;
-            if (target.tagName === 'SPAN') {
-                btn = target.parentNode;
-            } else {
-                btn = target;
-            }
-            this.showLoader = true;
-            btn.style.height = btn.offsetHeight + "px";
-            btn.style.width = btn.offsetWidth + "px";
             if (this.selectedProducts.length && this.productsTo.length) {
+                let target = e.target;
+                let btn = null;
+                if (target.tagName === 'SPAN') {
+                    btn = target.parentNode;
+                } else {
+                    btn = target;
+                }
+                this.showLoader = true;
+                btn.style.height = btn.offsetHeight + "px";
+                btn.style.width = btn.offsetWidth + "px";
                 this.$axios.post('/storage/transfer', this.generationData()).then((response) => {
                     this.showLoader = false;
                     btn.removeAttribute('style');
