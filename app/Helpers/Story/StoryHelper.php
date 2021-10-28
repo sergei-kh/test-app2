@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Story;
 
+use App\Models\Product;
 use App\Models\Storage;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -104,6 +105,35 @@ class StoryHelper
                 'is_from' => $story->is_from,
                 'date' => $story->created_at->format('d.m.Y H:i:s'),
                 'products' => $story->products,
+            ];
+        }
+        return $output;
+    }
+
+    /**
+     * Returns formatted product history
+     *
+     * @param Collection $stories
+     * @return array
+     */
+    public static function getFormatProduct(Collection $stories): array
+    {
+        $output = [];
+        $storages = Storage::all();
+        foreach ($stories as $story) {
+            $storage = $storages->firstWhere('id', $story->storage_id);
+            $storageTo = $storages->firstWhere('id', $story->target_id);
+            $output[] = [
+                'storage' => $storage->name,
+                'to' => $storageTo->name,
+                'is_from' => $story->is_from,
+                'date' => $story->created_at->format('d.m.Y H:i:s'),
+                'count' => $story->pivot->count,
+                'remainder' => $story->pivot->remainder,
+                'is_decreased' => $story->pivot->is_decreased,
+                'is_increased' => $story->pivot->is_increased,
+                'is_deleted' => $story->pivot->is_deleted,
+                'is_created' => $story->pivot->is_created,
             ];
         }
         return $output;

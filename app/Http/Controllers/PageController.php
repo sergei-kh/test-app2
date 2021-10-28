@@ -47,8 +47,11 @@ class PageController extends Controller
         return view('page.products.products', compact('products'));
     }
 
-    public function productsStory()
+    public function productsStory($id)
     {
-
+        $product = Product::with('stories')->findOrFail($id);
+        $stories = StoryHelper::getFormatProduct($product->stories);
+        \Debugbar::info($stories);
+        return view('page.products.product_story', compact('product', 'stories'));
     }
 }
