@@ -17,7 +17,7 @@ class CreateStoriesTable extends Migration
             $table->id();
             $table->boolean('is_from')->default(false);
             $table->unsignedBigInteger('storage_id');
-            $table->unsignedBigInteger('target_id');
+            $table->unsignedBigInteger('target_id')->nullable();
             $table->foreign('storage_id')
                 ->references('id')
                 ->on('storages');

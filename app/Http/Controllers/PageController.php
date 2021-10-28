@@ -51,7 +51,6 @@ class PageController extends Controller
     {
         $product = Product::with('stories')->findOrFail($id);
         $stories = StoryHelper::getFormatProduct($product->stories);
-        \Debugbar::info($stories);
         return view('page.products.product_story', compact('product', 'stories'));
     }
 }

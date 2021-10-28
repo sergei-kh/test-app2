@@ -88,6 +88,71 @@ class StoryHelper
     }
 
     /**
+     * Receives information about which products have been added and which have been written off
+     *
+     * @param Collection $oldProducts
+     * @param array $newProducts
+     * @return array
+     */
+    public static function getInfoProducts(Collection $oldProducts, array $newProducts): array
+    {
+        $enrollment = [];
+        $writeOff = [];
+        foreach ($newProducts as $id => $product) {
+            $oldProduct = $oldProducts->firstWhere('id', $id);
+            if ($oldProduct !== null) {
+                if ($oldProduct->pivot->count > $product['count']) {
+                    $result = $oldProduct->pivot->count - $product['count'];
+                    $writeOff[$id] = [
+                        'count' => $result,
+                        'remainder' => $product['count'],
+                        'is_decreased' => true,
+                        'is_increased' => false,
+                        'is_deleted' => false,
+                        'is_created' => false,
+                    ];
+                } elseif ($oldProduct->pivot->count < $product['count']) {
+                    $result = $product['count'] - $oldProduct->pivot->count;
+                    $enrollment[$id] = [
+                        'count' => $result,
+                        'remainder' => $product['count'],
+                        'is_decreased' => false,
+                        'is_increased' => true,
+                        'is_deleted' => false,
+                        'is_created' => false,
+                    ];
+                }
+            } else {
+                $enrollment[$id] = [
+                    'count' => 0,
+                    'remainder' => $product['count'],
+                    'is_decreased' => false,
+                    'is_increased' => false,
+                    'is_deleted' => false,
+                    'is_created' => true,
+                ];
+            }
+        }
+        foreach ($oldProducts as $product) {
+            if (!array_key_exists($product->id, $newProducts)) {
+                $writeOff[$product->id] = [
+                    'count' => 0,
+                    'remainder' => $product->pivot->count,
+                    'is_decreased' => false,
+                    'is_increased' => false,
+                    'is_deleted' => true,
+                    'is_created' => false,
+                ];
+            }
+        }
+        return [
+            'enrollment' => $enrollment,
+            'writeOff' => $writeOff,
+        ];
+    }
+
+
+    /**
      * Gets a formatted array of data
      *
      * @param Collection $stories
@@ -99,13 +164,21 @@ class StoryHelper
         $storages = Storage::all();
         foreach ($stories as $story) {
             $storageTarget = $storages->firstWhere('id', $story->target_id);
-            $output[] = [
-                'id' => $storageTarget->id,
-                'to' => $storageTarget->name,
-                'is_from' => $story->is_from,
-                'date' => $story->created_at->format('d.m.Y H:i:s'),
-                'products' => $story->products,
-            ];
+            if ($storageTarget) {
+                $output[] = [
+                    'to' => $storageTarget->name,
+                    'is_from' => $story->is_from,
+                    'date' => $story->created_at->format('d.m.Y H:i:s'),
+                    'products' => $story->products,
+                ];
+            } else {
+                $output[] = [
+                    'to' => null,
+                    'is_from' => $story->is_from,
+                    'date' => $story->created_at->format('d.m.Y H:i:s'),
+                    'products' => $story->products,
+                ];
+            }
         }
         return $output;
     }
@@ -125,7 +198,7 @@ class StoryHelper
             $storageTo = $storages->firstWhere('id', $story->target_id);
             $output[] = [
                 'storage' => $storage->name,
-                'to' => $storageTo->name,
+                'to' => ($storageTo !== null) ? $storageTo->name : null,
                 'is_from' => $story->is_from,
                 'date' => $story->created_at->format('d.m.Y H:i:s'),
                 'count' => $story->pivot->count,

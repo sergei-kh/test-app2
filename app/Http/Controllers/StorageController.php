@@ -93,12 +93,19 @@ class StorageController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $data = StorageHelper::getDataProducts($request);
-        $storage = Storage::find($id);
+        $storage = Storage::with('products')->find($id);
+        $infoProducts = StoryHelper::getInfoProducts($storage->products, $data);
         $status = true;
         if ($storage !== null) {
             $storage->products()->sync($data);
         } else {
             $status = false;
+        }
+        if (!empty($infoProducts['enrollment'])) {
+            $this->storyManager->create($storage, $infoProducts['enrollment'], false, 0);
+        }
+        if (!empty($infoProducts['writeOff'])) {
+            $this->storyManager->create($storage, $infoProducts['writeOff'], true, 0);
         }
         return response()->json([
             'status' => $status,

@@ -12,7 +12,9 @@ class StoryManagerService implements StoryManager
     {
         $story = new Story();
         $story->is_from = $isFrom;
-        $story->target_id = $id;
+        if ($id !== 0) {
+            $story->target_id = $id;
+        }
         $storage->stories()->save($story);
         $story->products()->sync($products);
     }
